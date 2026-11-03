@@ -9,7 +9,7 @@
 
 # 3.
 
-# table:
+# table: 
 
 # Explain how the selected clustering variables relate to your research question.
 
@@ -19,7 +19,7 @@
 
 # Note potential preparation needs, including missing values, scaling, and categorical encoding.
 
-# 4. Dataset title, provider, and source link
-# Relevant variables
+# 4. Dataset title, provider, and source link - kiet 
+# Relevant variables 
 # How it could contribute to your research question or cluster interpretation
 # How it could connect to your current data—for example, through a shared identifier, location, or time period

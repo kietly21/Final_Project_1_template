@@ -1,0 +1,121 @@
+# Crime Analytics in Washington, D.C.
+
+**Team members:** Myles Lewis, Kiet Ly
+
+## Overview
+
+This dataset contains a subset of crime locations within Washington, D.C., which are reported in the Analytical Services Application database by the District of Columbia Metropolitan Police Department.
+
+The file used here is the 2025 incident file: 24,156 incident records covering 206 census tracts, with fields for offense type, method, start and report time, and several geographic units.
+
+## Research Question
+
+Are there "nightlife" type areas where crime concentrates late at night, and how do they differ from areas with daytime-dominant crime?
+
+## Source
+
+[Crime Incidents in 2025, DC Open Data](https://opendata.dc.gov/datasets/74d924ddc3374e3b977e6f002478cb9b_7/explore?location=38.888659%2C-76.991409%2C17)
+
+---
+
+# Session 1
+
+## 1. Paper Summary
+
+### Summary of the article
+
+The authors propose a 4 step method for performing interpretable cluster analysis. First the data must be preprocessed by removing any variables with too many missing values, any remaining missing values imputed, and outliers identified. Then dimensionality reduction should be performed on the dataset to reduce the number of variables. Here they use SPCA (Sparse Principal Component Analysis) for numeric variables and MCA (Multiple Correspondence Analysis) for categorical variables. This allows the results to be more easily interpreted and improves distance based clustering. Next clustering should be performed using k-means (default option). The number of clusters was determined using the elbow method. Finally, classification is performed to build a model that can predict the cluster labels. SHAP (SHapley Additive exPlanations) values are then used to determine which variables are important for each cluster.
+
+### Why the results of clustering need to be interpreted
+
+As clustering is an unsupervised learning technique, it will just return cluster numbers that have no meaning. Someone needs to interpret the data to find out why the clusters are different.
+
+### Why classification helps
+
+The cluster labels can be used as the target variable in a supervised model. The variables used to predict the cluster labels are what is separating the clusters. SHAP will also show if the variables are having a positive/negative effect. If the classifier uses the same variables as the clustering then it will give an interpretation of what the clusters represent but will not provide independent validation.
+
+### Example
+
+The second paper used this method to cluster students from the Programme for International Student Assessment (PISA) dataset (2022) of 30,800 students from Spain. This reduced the number of variables from 74 to 16 new variables. 7 clusters were formed. An XGBoost classifier was trained (accuracy = 0.8643). The main factors separating the student profiles were economic, social and cultural status and access to Information and Communications Technology (ICT) at home.
+
+### Our Project
+
+We will cluster the DC census tracts based on the time of occurrence of crime (proportion of crimes occurring at certain times of day, weekends and seasons). We will then classify the clusters based on the proportion of offenses and weapons. As the predictor variables are different to those used for clustering, this will interpret the clusters using independent information. The cluster labels will never be used as an input feature.
+
+## 2. Variable Selection
+
+### Variable-Selection Table
+
+| Variable | Description and unit | Data type | Proposed role | Rationale / preparation needed |
+|---|---|---|---|---|
+| START_DATE | Date and time the incident started (UTC, Coordinated Universal Time) | Datetime | Source for clustering inputs | Convert to Eastern time, then derive hour, weekday, and month. Keep only incidents that started in 2025 |
+| REPORT_DAT | Date and time the incident was reported (UTC) | Datetime | Filter only | Used to drop incidents reported long after they started. Not a feature |
+| Hour-of-day shares (per tract) | Proportion of a tract's incidents in each time block, such as 4-hour blocks | Numerical | Clustering input | Derived from START_DATE. Proportions rather than counts, so clusters reflect timing and not crime volume |
+| Weekend share (per tract) | Proportion of a tract's incidents on Saturday or Sunday | Numerical | Clustering input | Derived from START_DATE |
+| Seasonal share (per tract) | Proportion of a tract's incidents in each season | Numerical | Clustering input | Derived from START_DATE. Drop it if it adds noise |
+| OFFENSE | Crime type (9 categories, such as theft, robbery, assault with a dangerous weapon) | Categorical | Classification input | Convert to per-tract offense shares. Merge ARSON (4 rows) into an "other" group |
+| METHOD | Method used: GUN, KNIFE, or OTHERS | Categorical | Classification input | Convert to per-tract gun share and knife share |
+| CENSUS_TRACT | Census tract identifier | Categorical | Aggregation key | Unit of analysis. Drop the 6 rows with a missing tract |
+| Incident count (per tract) | Total incidents in the tract | Numerical | Contextual (filter) | Used to set a minimum number of incidents per tract (for example 50). Not a clustering feature |
+| WARD, DISTRICT, PSA (Police Service Area), ANC (Advisory Neighborhood Commission), NEIGHBORHOOD_CLUSTER | Other DC geographic units | Categorical | Contextual | Used to interpret and map the clusters afterward. NEIGHBORHOOD_CLUSTER is a DC geography, unrelated to our cluster analysis |
+| SHIFT | Shift label: DAY, EVENING, or MIDNIGHT | Categorical | Exclude from clustering | Assigned by report time, not incident time, so it would mix up when crimes occur and when they are reported. Used only as a cross-check |
+| LATITUDE, LONGITUDE | Incident location (degrees) | Numerical | Contextual | For mapping clusters. Locations are anonymized to the block level |
+| X, Y, XBLOCK, YBLOCK, BLOCK, BLOCK_GROUP, VOTING_PRECINCT, BID (Business Improvement District), END_DATE | Duplicate location fields or sparse fields | Mixed | Exclude | Redundant with other columns, or mostly missing (BID is missing for about 80% of rows) |
+| CCN (Central Complaint Number), OBJECTID, OCTO_RECORD_ID | Record identifiers | Identifier | Exclude | Identifiers carry no information about crime patterns. OCTO_RECORD_ID is entirely empty. Remove duplicate CCN rows (3 homicide cases appear twice) |
+| Cluster label | Cluster assignment produced later | Categorical | Classification target | Created after clustering. Never used as an input feature |
+
+### Rationale
+
+**How the clustering variables relate to the research question.** The question asks whether some areas have crime concentrated late at night while others are daytime-dominant. The clustering inputs (hour-of-day shares, weekend share, and seasonal share per census tract) describe when crime happens in each tract. Using proportions instead of counts means the clusters reflect timing and not how much crime a tract has.
+
+**Candidate predictors for explaining the clusters.** The classification stage will use the per-tract offense shares (OFFENSE) and the gun and knife shares (METHOD) to predict the cluster labels. Ward, district, and the other geographic units are kept as context for interpreting and mapping the clusters. Because the predictors differ from the clustering variables, the classifier explains the clusters with independent information instead of only characterizing them. If the same variables were used for both, it would characterize the clustering result and not independently validate it.
+
+**Variables to exclude.** Record identifiers (CCN, OBJECTID, OCTO_RECORD_ID), duplicate or redundant location fields (X, Y, XBLOCK, YBLOCK, BLOCK, BLOCK_GROUP, VOTING_PRECINCT), sparse fields (BID, END_DATE), and SHIFT, which follows report time and not incident time. The cluster label is never an input feature.
+
+**Preparation needs.**
+- **Missing values:** 6 rows have no census tract and are dropped. Duplicate case records are removed. Tracts with too few incidents are filtered out, because proportions from a handful of incidents are unreliable.
+- **Time handling:** All timestamps are in UTC and are converted to Eastern time before extracting hour, weekday, and season. Only incidents that started in 2025 and were reported promptly are kept.
+- **Scaling:** The clustering features are proportions, but they are standardized before dimensionality reduction and clustering.
+- **Categorical encoding:** OFFENSE and METHOD are converted into per-tract shares, so no separate encoding is needed.
+
+## 3. Supplementary Dataset
+
+### Boston Crime Report
+
+**Provider:** Boston Police Department, issued by the City of Boston Department of Innovation and Technology.
+
+**Link:** https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system
+
+**Description:** This dataset contains crime reports collected by the Boston Police Department. It records information about the types of crime and when/where it occurred. This dataset includes important variables like OCCURRED_ON_DATE, OFFENSE_CODE, HOUR, DAY_OF_WEEK, MONTH, DISTRICT, REPORTING_AREA, AND OFFENSE_DESCRIPTION, all of which has some kind of value in connecting this supplementary dataset to our D.C dataset.
+
+### Relevant Variables Table
+
+| Boston Variable | Description | DC Correlation | Role/Purpose |
+|---|---|---|---|
+| OCCURRED_ON_DATE | Date and time the incident could have taken place. | START_DATE | Used to define night-time and daytime. We turn it into each subdivision: late-night, evening, and daytime, so that it groups by when crimes occur. Also lets us label the resulting clusters (nightlife vs. daytime dominant) and compare their timing in DC and Boston. |
+| OFFENSE_CODE, OFFENSE_DESCRIPTION | Category and seriousness of the offense | OFFENSE | Classification inputs are matched to DC's groups; OFFENSE_DESCRIPTION ensures accurate comparison of offenses. |
+| DISTRICT, REPORTING_AREA | Which part the crime is located in. | DISTRICT, PSA | Describes where each cluster occurred. |
+| HOUR, DAY_OF_WEEK, MONTH | Cluster of the day, month, and hour occurred. | START_DATE | DAY_OF_WEEK measures weekend-night share, which separates actual nightlife areas from areas that are busy late on weeknights for different reasons. We utilize these to cross-check if there are any time mistakes. |
+| SHOOTING | Whether shootings were involved in the crime. | METHOD | Measures how severe crime may be in each section. Helps answer whether late-night clusters are more violent. Closely related to the DC gun share, but is not identical. |
+
+### How it could contribute to your research question or cluster interpretation
+
+This additional dataset from Boston adds:
+
+**i.** Comparative test: Finding a nightlife cluster in DC may demonstrate something specific to DC. But if a similar and comparable city, like Boston, also creates a group of clusters with unusually high late-night crimes, it may support the idea that nightlife areas are a recognizable pattern.
+
+**ii.** Interpretation: If nightlife clusters in both cities display an offense profile that varies from the daytime-dominant cluster, the interpretation is likely to be more convincing. For instance, we hypothesize that late-night clusters have a larger number of violent crimes and daytime clusters has a less amount of crimes. If similar patterns appear in Boston, this could strengthen our interpretation. However, if DC and Boston disagree, then that points to city-specific factors, like differing regulations and areas.
+
+### How it could connect to your current data
+
+**i.** Shared Features: Both cities' datasets include similar features that have the same definitions, including when crimes occurred, types of offenses, and their geographic locations. Only 2025 crime incidents are used to sustain a consistent time period. Timestamps are converted into Eastern local time, considering both Eastern Standard Time and Eastern Daylight Time, before creating standardized time variables like hour, day, and month.
+
+**ii.** Offense Classification: Boston's OFFENSE_CODE and OFFENSE_DESCRIPTION are used to help group offenses into categories, like violent, property, and other crimes. Similarly, Washington, D.C.'s OFFENSE variable can be used to create comparable offense categories. This allows us to analyze whether varying methods of crime are correlated with nighttime and daytime dominant zones in both cities.
+
+**iii.** Geographic: Both datasets hold different geographic identifiers. Washington, D.C., uses census tracts (small subdivisions of a county), while Boston provides reporting areas and police districts. Even though these geographic units can't be directly the same, we can examine each city independently and compare the resulting crime pattern at its own geographic level.
+
+---
+
+# Future Project Updates
+
+*Updates from later sessions will be added here.*

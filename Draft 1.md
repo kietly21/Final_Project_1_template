@@ -108,7 +108,7 @@ This additional dataset from Boston adds:
 
 ### How it could connect to your current data
 
-**i.** Shared Features: Both cities' datasets include similar features that have the same definitions, including when crimes occurred, types of offenses, and their geographic locations. Only 2025 crime incidents are used to sustain a consistent time period. Timestamps are converted into Eastern local time, considering both Eastern Standard Time and Eastern Daylight Time, before creating standardized time variables like hour, day, and month.
+**i.** Shared Features: Both cities' datasets include similar features that have the same definitions, including when crimes occurred, types of offenses, and their geographic locations. Only 2025 crime incidents are used to sustain a consistent time period. DC timestamps are converted from UTC to Eastern local time, accounting for both Eastern Standard Time and Eastern Daylight Time, before creating standardized time variables like hour, day, and month. Boston timestamps are already in local time.
 
 **ii.** Offense Classification: Boston's OFFENSE_CODE and OFFENSE_DESCRIPTION are used to help group offenses into categories, like violent, property, and other crimes. Similarly, Washington, D.C.'s OFFENSE variable can be used to create comparable offense categories. This allows us to analyze whether varying methods of crime are correlated with nighttime and daytime dominant zones in both cities.
 

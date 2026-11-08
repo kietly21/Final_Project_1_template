@@ -6,6 +6,8 @@
 
 **Link:** https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system
 
+**Description:** This dataset contains crime reports collected by the Boston Police Department. It records information about the types of crime and when/where it occurred. This dataset includes important variables like OCCURRED_ON_DATE, OFFENSE_CODE, HOUR, DAY_OF_WEEK, MONTH, DISTRICT, REPORTING_AREA, AND OFFENSE_DESCRIPTION, all of which has some kind of value in connecting this supplementary dataset to our D.C dataset.
+
 ## Relevant Variables Table
 
 | Boston Variable | Description | DC Correlation | Role/Purpose |

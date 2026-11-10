@@ -3,6 +3,7 @@
    Can also include temporal variables, like: Times: Evening, Midnight, Daytime.
    Create an Excel file that includes all ~200+ census tracts.
 New supplementary dataset: https://opendata.dc.gov/datasets/DCGIS::alcohol-license-business-locations/about
+
 Second supplementary dataset: https://catalog.data.gov/dataset/metro-station-entrances-in-dc
 - This connects to our dataset
 

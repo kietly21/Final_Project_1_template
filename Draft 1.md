@@ -80,27 +80,27 @@ We will cluster the DC census tracts based on the time of occurrence of crime (p
 
 ## 3. Supplementary Dataset
 
-### Boston Crime Report
+### Alcohol License Business Locations 
 
-**Provider:** Boston Police Department, issued by the City of Boston Department of Innovation and Technology.
+**Provider:** Records from Alcoholic Beverage and Cannabis Administration (ABCA)
 
-**Link:** https://data.boston.gov/dataset/crime-incident-reports-august-2015-to-date-source-new-system
+**Link:** https://opendata.dc.gov/datasets/DCGIS::alcohol-license-business-locations/about
 
-**Description:** This dataset contains crime reports collected by the Boston Police Department. It records information about the types of crime and when/where it occurred. This dataset includes important variables like OCCURRED_ON_DATE, OFFENSE_CODE, HOUR, DAY_OF_WEEK, MONTH, DISTRICT, REPORTING_AREA, AND OFFENSE_DESCRIPTION, all of which has some kind of value in connecting this supplementary dataset to our D.C dataset.
+**Description:** This supplementary dataset from DC gives us a list of alcohol licensed businesses. It provides us with a separate measure of nightlife (where bars, nightclubs, and restaurants with entertainment are located), which helps us analyze the late-night crimes.
 
 ### Relevant Variables Table
 
-| Boston Variable | Description | DC Correlation | Role/Purpose |
-|---|---|---|---|
-| OCCURRED_ON_DATE | Date and time the incident could have taken place. | START_DATE | Used to define night-time and daytime. We turn it into each subdivision: late-night, evening, and daytime, so that it groups by when crimes occur. Also lets us label the resulting clusters (nightlife vs. daytime dominant) and compare their timing in DC and Boston. |
-| OFFENSE_CODE, OFFENSE_DESCRIPTION | Category and seriousness of the offense | OFFENSE | Classification inputs are matched to DC's groups; OFFENSE_DESCRIPTION ensures accurate comparison of offenses. |
-| DISTRICT, REPORTING_AREA | Which part the crime is located in. | DISTRICT, PSA | Describes where each cluster occurred. |
-| HOUR, DAY_OF_WEEK, MONTH | Cluster of the day, month, and hour occurred. | START_DATE | DAY_OF_WEEK measures weekend-night share, which separates actual nightlife areas from areas that are busy late on weeknights for different reasons. We utilize these to cross-check if there are any time mistakes. |
-| SHOOTING | Whether shootings were involved in the crime. | METHOD | Measures how severe crime may be in each section. Helps answer whether late-night clusters are more violent. Closely related to the DC gun share, but is not identical. |
+| Relevant Variable | Description/measures | Role/Purpose |
+|---|---|---|
+| TYPE | What kind of establishment | Differentiates nightlife establishments from stores and restaurants. |
+| ENTERTAINMENT, DANCING, COVERCHARGE | Checks off whether the establishment has any dancing, covercharge, or dancing. | Helps us distinguish places that may have entertainment (nightlife).|
+| LATITUDE, LONGITUDE | Exact location | Mapping and placing the licenses in census tracts. |
+| WARD, ANC, SMD | Ward, Advisory Neighborhood Commission, and single-member district | All of these are shared identifiers with the DC crime file, allows us to locate restaurants, clubs, or bars near any crimes. |
+
 
 ### How it could contribute to your research question or cluster interpretation
 
-This additional dataset from Boston adds:
+This additional dataset from Alcoholic Beverage and Cannabis Administration:
 
 **i.** Comparative test: Finding a nightlife cluster in DC may demonstrate something specific to DC. But if a similar and comparable city, like Boston, also creates a group of clusters with unusually high late-night crimes, it may support the idea that nightlife areas are a recognizable pattern.
 

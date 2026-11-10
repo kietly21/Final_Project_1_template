@@ -100,19 +100,17 @@ We will cluster the DC census tracts based on the time of occurrence of crime (p
 
 ### How it could contribute to your research question or cluster interpretation
 
-This additional dataset from Alcoholic Beverage and Cannabis Administration:
+This additional dataset from the Alcoholic Beverage and Cannabis Administration:
 
-**i.** Comparative test: Finding a nightlife cluster in DC may demonstrate something specific to DC. But if a similar and comparable city, like Boston, also creates a group of clusters with unusually high late-night crimes, it may support the idea that nightlife areas are a recognizable pattern.
+**i.** Checks "nightlife" label. If the late-night cluster contains more nightclubs and entertainment-dominant establishments per area than daytime-dominant clusters, the label is better favored. If it doesn't, the cluster may be late-night for different reasons.
 
-**ii.** Interpretation: If nightlife clusters in both cities display an offense profile that varies from the daytime-dominant cluster, the interpretation is likely to be more convincing. For instance, we hypothesize that late-night clusters have a larger number of violent crimes and daytime clusters has a less amount of crimes. If similar patterns appear in Boston, this could strengthen our interpretation. However, if DC and Boston disagree, then that points to city-specific factors, like differing regulations and areas.
+**ii.** Separates establishment types: Allows us to compare restaurants, nightclubs, and bars with off-premise stores, like liquor or grocery stores. It shows us whether late-night crimes have an association with establishments with entertainment and alcohol.
 
 ### How it could connect to your current data
 
-**i.** Shared Features: Both cities' datasets include similar features that have the same definitions, including when crimes occurred, types of offenses, and their geographic locations. Only 2025 crime incidents are used to sustain a consistent time period. DC timestamps are converted from UTC to Eastern local time, accounting for both Eastern Standard Time and Eastern Daylight Time, before creating standardized time variables like hour, day, and month. Boston timestamps are already in local time.
+**i.** ANC: Both datasets have an ANC field, which serves as a direct shared identifier. A shared identifier allows us to put each area's crime count and nightlife establish into a row, so we can compare whether areas with high late-night are also areas that contain nightclubs and bars. The formats for the values differ, but after removing the prefix ANC, all 46 ANCs in the crime file have a match. 
 
-**ii.** Offense Classification: Boston's OFFENSE_CODE and OFFENSE_DESCRIPTION are used to help group offenses into categories, like violent, property, and other crimes. Similarly, Washington, D.C.'s OFFENSE variable can be used to create comparable offense categories. This allows us to analyze whether varying methods of crime are correlated with nighttime and daytime dominant zones in both cities.
-
-**iii.** Geographic: Both datasets hold different geographic identifiers. Washington, D.C., uses census tracts (small subdivisions of a county), while Boston provides reporting areas and police districts. Even though these geographic units can't be directly the same, we can examine each city independently and compare the resulting crime pattern at its own geographic level.
+**ii.** Ward: DC is divided into eight wards, this is listed in each the crime and licensed business dataset. With a wider range, this allows us to evaluate the correlation of late-night crimes and establishments that contain entertainment and alcoholic beverages. Analyzing wards makes it clearer and easier to understand, we can simply see whether a ward with the most nightlife also has the most late night crime. Although eight wards may be too few for detailed analyzes and each ward combines busy nightlife and quiet areas, we can ulitize wards to quickly check on our 
 
 ---
 
